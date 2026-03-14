@@ -1,12 +1,23 @@
-import { Button } from "@/components/ui/button";
 import { BarChart3, BrainCircuit, Loader2, Phone, Users } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useInternetIdentity();
+  const loginRef = useRef(login);
+  loginRef.current = login;
+
+  // Auto-trigger login on page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loginRef.current();
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-sidebar flex">
+      {/* Left branding panel */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-sidebar-foreground">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
@@ -44,9 +55,10 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {/* Right login panel */}
       <div className="flex-1 flex items-center justify-center bg-background p-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
+        <div className="w-full max-w-md space-y-8 text-center">
+          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <BrainCircuit className="w-6 h-6 text-primary-foreground" />
             </div>
@@ -54,37 +66,49 @@ export default function LoginPage() {
               AI Recruitment
             </span>
           </div>
-          <div>
-            <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
-            <p className="text-muted-foreground mt-2">
-              Sign in to your recruiter account
-            </p>
-          </div>
-          <Button
-            data-ocid="login.submit_button"
-            onClick={login}
-            disabled={isLoggingIn}
-            size="lg"
-            className="w-full h-12 text-base"
-          >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Connecting...
-              </>
-            ) : (
-              "Sign in with Internet Identity"
-            )}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            New to the platform?{" "}
+
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <BrainCircuit className="w-9 h-9 text-primary" />
+              </div>
+              {isLoggingIn && (
+                <div className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">
+                {isLoggingIn ? "Connecting..." : "Welcome Back"}
+              </h2>
+              <p className="text-muted-foreground mt-2 text-sm">
+                {isLoggingIn
+                  ? "Opening secure login window..."
+                  : "Sign in to access your recruiter dashboard"}
+              </p>
+            </div>
+
             <button
               type="button"
+              data-ocid="login.submit_button"
               onClick={login}
-              className="text-primary hover:underline font-medium"
+              disabled={isLoggingIn}
+              className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-primary text-primary-foreground font-medium text-base hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              Create account
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
-          </p>
+
+            <p className="text-xs text-muted-foreground">
+              Secured by Internet Identity &bull; No password required
+            </p>
+          </div>
         </div>
       </div>
     </div>
